@@ -10,7 +10,7 @@
         Add Pin</button>
     </div>
     <!-- Start: Pin list -->
-    <app-pin-list class="col-12"></app-pin-list>
+    <app-pin-list class="col-12" [pinList]="pinList"></app-pin-list>
     <!-- End: Pin list -->
   </div>
 </div>
@@ -21,40 +21,61 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="createCustomerModalLabel">Create Customer</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="custForm.reset()">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <form>
+        <form name="cutomerForm" [formGroup]="custForm">
           <div class="form-group">
             <label for="customer-name" class="col-form-label">Name<span class="text-danger">*</span>:</label>
-            <input type="text" class="form-control" id="customer-name">
+            <div *ngIf="custForm.get('name').invalid && (custForm.get('name').dirty || custForm.get('name').touched)"
+              class="d-inline-block text-danger ml-2">
+              Please provide a name.
+            </div>
+            <input type="text" class="form-control" formControlName="name" id="customer-name">
           </div>
           <div class="form-group">
             <label for="email-name" class="col-form-label">Email<span class="text-danger">*</span>:</label>
-            <input type="text" class="form-control" id="email-name">
+            <div *ngIf="custForm.get('email').invalid && (custForm.get('email').dirty || custForm.get('email').touched)"
+              class="d-inline-block text-danger ml-2">
+              Please provide a email.
+            </div>
+            <input type="text" class="form-control" formControlName="email" id="email-name">
           </div>
           <div class="form-group">
             <label for="region-name" class="col-form-label">Region<span class="text-danger">*</span>:</label>
-            <select class="form-control" id="region-name">
+            <div
+              *ngIf="custForm.get('region').invalid && (custForm.get('region').dirty || custForm.get('region').touched)"
+              class="d-inline-block text-danger ml-2">
+              Please provide a region.
+            </div>
+            <select class="form-control" formControlName="region" (change)="handleRegionAndCountryList($event,'region')"
+              id="region-name">
               <option value="">Select</option>
               <option *ngFor="let region of region.list;" [value]="region">{{region}}</option>
             </select>
           </div>
           <div class="form-group">
             <label for="country-name" class="col-form-label">Country<span class="text-danger">*</span>:</label>
-            <select class="form-control" id="country-name">
+            <div
+              *ngIf="custForm.get('country').invalid && (custForm.get('country').dirty || custForm.get('country').touched)"
+              class="d-inline-block text-danger ml-2">
+              Please provide a country.
+            </div>
+            <select class="form-control" formControlName="country"
+              (change)="handleRegionAndCountryList($event,'country')" id="country-name">
               <option value="">Select</option>
               <option *ngFor="let country of region.countries;" [value]="country">{{country}}</option>
             </select>
           </div>
-
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-outline-primary">Save Details</button>
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"
+          (click)="custForm.reset()">Close</button>
+        <button type="button" class="btn btn-outline-primary" (click)="saveCustomer()" [disabled]="!custForm.valid"
+          data-dismiss="modal">Save Details</button>
       </div>
     </div>
   </div>
@@ -65,15 +86,19 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="createPinModalLabel">Create Pin</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="pinForm.reset()">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <form>
+        <form name="pinForm" [formGroup]="pinForm">
           <div class="form-group">
             <label for="title-name" class="col-form-label">Title<span class="text-danger">*</span>:</label>
-            <input type="text" class="form-control" id="title-name">
+            <div *ngIf="pinForm.get('title').invalid && (pinForm.get('title').dirty || pinForm.get('title').touched)"
+              class="d-inline-block text-danger ml-2">
+              Please provide a title.
+            </div>
+            <input type="text" class="form-control" formControlName="title" id="title-name">
           </div>
           <div class="form-group">
             <label for="message-text" class="col-form-label">Select Image<span class="text-danger">*</span>:</label>
@@ -88,26 +113,40 @@
           <div class="form-group">
             <label for="collaboratory-name" class="col-form-label">Select Collaboratory<span
                 class="text-danger">*</span>:</label>
-            <angular2-multiselect [data]="dropdownList" name="clb" [(ngModel)]="selectedItems"
-              [settings]="dropdownSettings" (onSelect)="onItemSelect($event)" (onDeSelect)="OnItemDeSelect($event)"
-              (onDeSelectAll)="onDeSelectAll($event)"></angular2-multiselect>
+            <div
+              *ngIf="pinForm.get('collaborators').invalid && (pinForm.get('collaborators').dirty || pinForm.get('collaborators').touched)"
+              class="d-inline-block text-danger ml-2">
+              Please provide a collaborators.
+            </div>
+            <angular2-multiselect [data]="collaboratorList" name="clb" formControlName="collaborators"
+              [settings]="dropdownSettings"></angular2-multiselect>
           </div>
           <div class="form-group">
-            <label for="privacy-name" class="col-form-label d-block">Privacy<span class="text-danger">*</span>:</label>
+            <div class="d-block">
+              <label for="privacy-name" class="col-form-label">Privacy<span class="text-danger">*</span>:</label>
+              <div
+                *ngIf="pinForm.get('privacy').invalid && (pinForm.get('privacy').dirty || pinForm.get('privacy').touched)"
+                class="d-inline-block text-danger ml-2">
+                Please provide a privacy.
+              </div>
+            </div>
             <div class="custom-control custom-radio d-inline-block mx-2">
-              <input type="radio" name="privacy" class="custom-control-input" id="customCheck1">
+              <input type="radio" name="privacy" class="custom-control-input" formControlName="privacy" value="Private"
+                id="customCheck1">
               <label class="custom-control-label" for="customCheck1">Private</label>
             </div>
             <div class="custom-control custom-radio d-inline-block">
-              <input type="radio" name="privacy" class="custom-control-input" id="customCheck1">
-              <label class="custom-control-label" for="customCheck1">Public</label>
+              <input type="radio" name="privacy" class="custom-control-input" formControlName="privacy" value="Public"
+                id="customCheck2">
+              <label class="custom-control-label" for="customCheck2">Public</label>
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Send message</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="pinForm.reset()">Close</button>
+        <button type="button" class="btn btn-primary" [disabled]="!pinForm.valid" data-dismiss="modal"
+          aria-label="Close" (click)="savePin()">Save Details</button>
       </div>
     </div>
   </div>

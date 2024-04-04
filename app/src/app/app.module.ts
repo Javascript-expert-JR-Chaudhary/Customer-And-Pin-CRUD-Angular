@@ -7,7 +7,7 @@ import { PinListComponent } from './pin-list/pin-list.component';
 import { DndDirective } from './common/directive/dnd.directive';
 import { EllipsisPipe } from './common/pipe/ellipsis.pipe';
 
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AngularMultiSelectModule } from 'angular2-multiselect-dropdown';
 
 @NgModule({
@@ -20,6 +20,7 @@ import { AngularMultiSelectModule } from 'angular2-multiselect-dropdown';
   imports: [
     BrowserModule,
     FormsModule,
+    ReactiveFormsModule,
     NgbModule,
     AngularMultiSelectModule
   ],
