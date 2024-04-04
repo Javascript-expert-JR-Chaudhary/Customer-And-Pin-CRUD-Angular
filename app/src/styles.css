@@ -1,1 +1,6 @@
+/* Mutiselect theme style */
+@import "./../node_modules/angular2-multiselect-dropdown/themes/default.theme.css";
 /* You can add global styles to this file, and also import other style files */
+.cursor-pointer {
+    cursor: pointer;
+}
