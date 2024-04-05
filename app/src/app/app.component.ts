@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { RegionList } from './common/factory/region.factory';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { HelperService } from './common/service/helper.service';
+import { Customer } from './common/interface/customer';
+import { Pin } from './common/interface/pin';
 
 @Component({
   selector: 'app-root',
@@ -9,17 +11,21 @@ import { HelperService } from './common/service/helper.service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
+  @ViewChild('customerFormEl') customerFormEl: ElementRef<HTMLElement>;
+  @ViewChild('pinFormEl') pinFormEl: ElementRef<HTMLElement>;
+  // Region properties
   region: { [key: string]: any[] } = {
     masterList: [],
     list: [],
     countries: []
   };
-  customerList: any[] = [];
-  pinList: any[] = [];
+  // Customer and Pin properties
+  customerList: Customer[] = [];
+  pinList: Pin[] = [];
   custForm: FormGroup;
   pinForm: FormGroup;
   formImgName: string = '';
-
+  // Multiselect dropdown properties
   collaboratorList = [];
   dropdownSettings = {
     singleSelection: false,
@@ -27,7 +33,7 @@ export class AppComponent implements OnInit {
     enableSearchFilter: false,
   };
 
-  constructor(private helperService: HelperService) {
+  constructor(private helperService: HelperService, private elementRef: ElementRef) {
     this.createCustomerForm();
     this.createPinForm();
     this.getPinAndCustomerList();
@@ -44,17 +50,26 @@ export class AppComponent implements OnInit {
       email: new FormControl('', Validators.required),
       region: new FormControl('', Validators.required),
       country: new FormControl('', Validators.required)
-    })
+    });
   }
   /**
    * Save customer details
    */
   saveCustomer() {
-    this.customerList.push(this.custForm.value);
-    this.helperService.saveCustomer(this.customerList);
-    this.collaboratorList.push({ id: Date.now(), itemName: this.custForm.value.name });
-    this.custForm.reset();
-    console.log(this.custForm.value)
+    if (this.custForm.valid) {
+      this.customerList.push(this.custForm.value);
+      this.helperService.saveCustomer(this.customerList);
+      // After saving customer details add customer inside collaborator list
+      this.collaboratorList.push({ id: Date.now(), itemName: this.custForm.value.name });
+      // Close and reset form
+      this.customerFormEl.nativeElement.click();
+      this.custForm.reset();
+    } else {
+      // Display valition error msg
+      Object.keys(this.custForm.controls).forEach(key => {
+        this.custForm.controls[key].markAsDirty();
+      });
+    }
   }
   /**
    * Create form schema for pin details
@@ -71,10 +86,18 @@ export class AppComponent implements OnInit {
    * Save pin details
    */
   savePin() {
-    this.pinList.push(this.pinForm.value);
-    this.helperService.savePin(this.pinList);
-    this.pinForm.reset();
-    console.log(this.pinForm.value)
+    if (this.pinForm.valid) {
+      this.pinList.push(this.pinForm.value);
+      this.helperService.savePin(this.pinList);
+      // Close and reset form
+      this.pinFormEl.nativeElement.click();
+      this.pinForm.reset();
+    } else {
+      // Display valition error msg
+      Object.keys(this.pinForm.controls).forEach(key => {
+        this.pinForm.controls[key].markAsDirty();
+      });
+    }
   }
   /**
    * Fetch Region and country details from service API
@@ -82,8 +105,10 @@ export class AppComponent implements OnInit {
   getRegionList() {
     this.region.masterList = RegionList;
     this.region.masterList.forEach((val: any) => {
+      // Country List
       this.region.countries.push(val?.country);
       if (!this.region.list.includes(val.region)) {
+        // Region list
         this.region.list.push(val.region);
       }
     });
@@ -94,32 +119,32 @@ export class AppComponent implements OnInit {
   getPinAndCustomerList() {
     this.helperService.getCustomerList().subscribe((customers: string) => {
       if (customers) {
+        // Set customer list
         this.customerList = JSON.parse(customers);
-        this.customerList.forEach((cust: any, index: number) => {
+        this.customerList.forEach((cust: Customer, index: number) => {
+          // Set collaborator list
           this.collaboratorList.push({ id: index, itemName: cust.name });
-
         })
       }
     });
     this.helperService.getPinList().subscribe((pins: string) => {
       if (pins) {
+        // Set pin list
         this.pinList = JSON.parse(pins);
       }
     });
   }
   /**
-   * handle file from browsing
+   * handle file from browsing selection event
    */
   fileBrowseHandler(event: any) {
     this.formImgName = event?.target?.files[0].name;
     this.saveImgData(event?.target?.files[0]);
-    console.log(event)
   }
   /**
-   * on file drop handler
+   * On file drop handler
    */
   onFileDropped(event: any) {
-    console.log(event)
     this.formImgName = event?.[0].name;
     this.saveImgData(event?.[0])
   }
@@ -131,6 +156,7 @@ export class AppComponent implements OnInit {
     var reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
+      // Save file base64 data
       this.pinForm.patchValue({
         image: reader.result
       });
