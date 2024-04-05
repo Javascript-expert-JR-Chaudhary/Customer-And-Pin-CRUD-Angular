@@ -98,7 +98,7 @@
       <!-- Start: Modal Header -->
       <div class="modal-header">
         <h5 class="modal-title" id="createPinModalLabel">Create Pin</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="pinForm.reset()">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="resetPinForm()">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -165,7 +165,7 @@
       <!-- Start: Footer action button -->
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal" #pinFormEl
-          (click)="pinForm.reset()">Close</button>
+          (click)="resetPinForm()">Close</button>
         <button type="button" class="btn btn-primary" (click)="savePin()">Save Details</button>
       </div>
       <!-- End: Footer action button -->

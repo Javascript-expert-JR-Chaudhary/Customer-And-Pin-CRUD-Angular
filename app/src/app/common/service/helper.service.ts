@@ -2,11 +2,20 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Customer } from '../interface/customer';
 import { Pin } from '../interface/pin';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HelperService {
+  constructor(private toastr: ToastrService) { }
+  /**
+   * 
+   * @param data Message and title details
+   */
+  success(data: { [key: string]: string }) {
+    this.toastr.success(data['message'], data['title']);
+  }
   /**
    * 
    * @returns Fetch customer list from local storage

@@ -13,6 +13,7 @@ import { Pin } from './common/interface/pin';
 export class AppComponent implements OnInit {
   @ViewChild('customerFormEl') customerFormEl: ElementRef<HTMLElement>;
   @ViewChild('pinFormEl') pinFormEl: ElementRef<HTMLElement>;
+  @ViewChild('fileDropRef') fileDropRef: ElementRef;
   // Region properties
   region: { [key: string]: any[] } = {
     masterList: [],
@@ -33,7 +34,7 @@ export class AppComponent implements OnInit {
     enableSearchFilter: false,
   };
 
-  constructor(private helperService: HelperService, private elementRef: ElementRef) {
+  constructor(private helperService: HelperService) {
     this.createCustomerForm();
     this.createPinForm();
     this.getPinAndCustomerList();
@@ -60,10 +61,14 @@ export class AppComponent implements OnInit {
       this.customerList.push(this.custForm.value);
       this.helperService.saveCustomer(this.customerList);
       // After saving customer details add customer inside collaborator list
-      this.collaboratorList.push({ id: Date.now(), itemName: this.custForm.value.name });
+      let lastId: number = this.collaboratorList.length;
+      this.collaboratorList.push({ id: lastId++, itemName: this.custForm.value.name });
+      console.log('Sometime collaborator list is noy updated due to lib issue');
+      console.log(this.collaboratorList)
       // Close and reset form
       this.customerFormEl.nativeElement.click();
       this.custForm.reset();
+      this.helperService.success({ message: 'Customer added successfully!', title: 'Success' });
     } else {
       // Display valition error msg
       Object.keys(this.custForm.controls).forEach(key => {
@@ -92,12 +97,21 @@ export class AppComponent implements OnInit {
       // Close and reset form
       this.pinFormEl.nativeElement.click();
       this.pinForm.reset();
+      this.helperService.success({ message: 'Pin added successfully!', title: 'Success' });
     } else {
       // Display valition error msg
       Object.keys(this.pinForm.controls).forEach(key => {
         this.pinForm.controls[key].markAsDirty();
       });
     }
+  }
+  /**
+   * On modal close reset form value
+   */
+  resetPinForm() {
+    this.pinForm.reset();
+    this.formImgName = '';
+    this.fileDropRef.nativeElement.value = "";
   }
   /**
    * Fetch Region and country details from service API
